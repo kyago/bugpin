@@ -1,6 +1,5 @@
 import chrome from 'sinon-chrome';
-// @ts-expect-error inject into globalThis
-globalThis.chrome = chrome;
+globalThis.chrome = chrome as unknown as typeof globalThis.chrome;
 
 beforeEach(() => {
   chrome.flush();
