@@ -16,7 +16,7 @@ export function sanitizeOuterHTML(el: Element): string {
 function scrub(node: Element) {
   // Strip dangerous tags first
   for (const child of Array.from(node.children)) {
-    if (STRIP_TAGS.has(child.tagName)) {
+    if (STRIP_TAGS.has(child.tagName.toUpperCase())) {
       child.remove();
       continue;
     }
@@ -41,5 +41,6 @@ function scrub(node: Element) {
 }
 
 export function wrapInDetails(html: string): string {
-  return `<details><summary>선택 영역 HTML</summary>\n\n\`\`\`html\n${html}\n\`\`\`\n\n</details>`;
+  const escaped = html.replace(/```/g, '\\`\\`\\`');
+  return `<details><summary>선택 영역 HTML</summary>\n\n\`\`\`html\n${escaped}\n\`\`\`\n\n</details>`;
 }

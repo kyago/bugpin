@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { sanitizeOuterHTML } from '@/lib/sanitize-html';
+import { sanitizeOuterHTML, wrapInDetails } from '@/lib/sanitize-html';
 
 beforeEach(() => { document.body.innerHTML = ''; });
 
@@ -55,5 +55,23 @@ describe('sanitizeOuterHTML', () => {
     document.body.innerHTML = `<iframe srcdoc="<x>"></iframe>`;
     const out = sanitizeOuterHTML(document.body.firstElementChild!);
     expect(out).not.toContain('srcdoc');
+  });
+
+  it('removes SVG <script> (lowercase tagName)', () => {
+    document.body.innerHTML = `<svg><script>alert(1)</script><circle/></svg>`;
+    const out = sanitizeOuterHTML(document.body.firstElementChild!);
+    expect(out).not.toContain('<script');
+    expect(out).toContain('<circle');
+  });
+});
+
+describe('wrapInDetails', () => {
+  it('escapes triple backticks in HTML content', () => {
+    const out = wrapInDetails('<pre>```js\ncode\n```</pre>');
+    const innerStart = out.indexOf('```html\n');
+    const innerEnd = out.lastIndexOf('\n```');
+    const inner = out.slice(innerStart + 8, innerEnd);
+    expect(inner).not.toContain('```');
+    expect(inner).toContain('\\`\\`\\`');
   });
 });
