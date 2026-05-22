@@ -1,3 +1,5 @@
+import { POST_MESSAGE_SOURCE } from './constants';
+
 // ============ Storage ============
 
 export interface StorageSchema {
@@ -121,8 +123,8 @@ export interface BootstrapResponse {
 // ============ Page MAIN-world postMessage ============
 
 export type MainToIsoMessage =
-  | { __qaSource: 'qa-ext'; kind: 'console.error'; entry: Omit<ConsoleErrorEntry, 'count'> }
-  | { __qaSource: 'qa-ext'; kind: 'network.failure'; entry: Omit<NetworkFailureEntry, 'count'> };
+  | { __qaSource: typeof POST_MESSAGE_SOURCE; kind: 'console.error'; entry: Omit<ConsoleErrorEntry, 'count'> }
+  | { __qaSource: typeof POST_MESSAGE_SOURCE; kind: 'network.failure'; entry: Omit<NetworkFailureEntry, 'count'> };
 
 // ============ Token Test ============
 
