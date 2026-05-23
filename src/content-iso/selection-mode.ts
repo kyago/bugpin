@@ -28,12 +28,15 @@ export class SelectionMode {
     this.active = true;
     this.overlay.mount();
     document.body.style.cursor = 'crosshair';
+    // Register handleClick FIRST so it runs before blockAll on click events
+    // (same-phase listeners fire in registration order; handleClick calls
+    //  stopImmediatePropagation which then short-circuits blockAll).
+    document.addEventListener('click', this.handleClick, true);
+    document.addEventListener('mousemove', this.handleMove, true);
+    document.addEventListener('keydown', this.handleKey, true);
     BLOCK_EVENTS.forEach(t =>
       document.addEventListener(t, this.blockAll, true)
     );
-    document.addEventListener('keydown', this.handleKey, true);
-    document.addEventListener('mousemove', this.handleMove, true);
-    document.addEventListener('click', this.handleClick, true);
   }
 
   stop(): void {
