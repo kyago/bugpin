@@ -47,21 +47,24 @@ export function SelectionPanel() {
         {screen === 'MATCHED.PICK' ? '선택 취소 (ESC)' : '🎯 Element 선택'}
       </button>
       {screen === 'MATCHED.EDIT' && picked && (
-        <div className="slider-row">
-          <label>선택 범위:</label>
-          <button onClick={() => onDepthChange(Math.max(0, currentDepth - 1))}>◀</button>
-          <input
-            type="range"
-            min={0}
-            max={picked.maxDepth}
-            value={currentDepth}
-            onChange={(e) => onDepthChange(parseInt(e.target.value, 10))}
-          />
-          <button onClick={() => onDepthChange(Math.min(picked.maxDepth, currentDepth + 1))}>▶</button>
-          <span className="depth-label" title={picked.parentChainSummary[currentDepth]}>
-            {picked.parentChainSummary[currentDepth] ?? '?'}
-          </span>
-        </div>
+        <>
+          <div className="slider-row">
+            <label>선택 범위</label>
+            <button onClick={() => onDepthChange(Math.max(0, currentDepth - 1))}>◀</button>
+            <input
+              type="range"
+              min={0}
+              max={picked.maxDepth}
+              value={currentDepth}
+              onChange={(e) => onDepthChange(parseInt(e.target.value, 10))}
+            />
+            <button onClick={() => onDepthChange(Math.min(picked.maxDepth, currentDepth + 1))}>▶</button>
+            <span className="depth-index">{currentDepth} / {picked.maxDepth}</span>
+          </div>
+          <div className="depth-label" title={picked.parentChainSummary[currentDepth]}>
+            → {picked.parentChainSummary[currentDepth] ?? '?'}
+          </div>
+        </>
       )}
       {picked && (
         <div className="selector-preview" title={picked.selector}>
