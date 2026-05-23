@@ -1,0 +1,22 @@
+body { margin: 0; font: 14px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; background: #f4f5f7; color: #1f2937; }
+.options-root { max-width: 720px; margin: 24px auto; padding: 24px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+h1 { font-size: 20px; margin: 0 0 16px 0; }
+.threat-notice { background: #fffbea; border-left: 4px solid #f39c12; padding: 12px; border-radius: 4px; margin-bottom: 24px; font-size: 12px; color: #7a5300; }
+.mapping-row { border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 12px; }
+.mapping-row label { display: block; font-size: 11px; color: #6b7280; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.mapping-row input { width: 100%; padding: 7px 9px; border: 1px solid #d4d8de; border-radius: 4px; font: inherit; box-sizing: border-box; }
+.mapping-row .row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.mapping-row .name { width: auto; flex: 1; margin-right: 12px; font-weight: 600; }
+.mapping-row button { padding: 4px 10px; border: 1px solid #d4d8de; background: #f3f4f6; border-radius: 4px; cursor: pointer; font-size: 12px; margin-left: 4px; }
+.mapping-row button.danger { color: #c0392b; border-color: #f3c4be; background: #fdf3f1; }
+.mapping-row button.link { background: none; border: none; color: #5b8def; padding: 0; font-size: 11px; margin-top: 4px; cursor: pointer; }
+.token-row { display: flex; gap: 6px; }
+.token-row input { flex: 1; font-family: ui-monospace, Menlo, monospace; }
+.test-result { padding: 8px 10px; border-radius: 4px; margin: 8px 0; font-size: 12px; }
+.test-result.ok { background: #e6f7ef; color: #0a7a3b; border-left: 3px solid #16a085; }
+.test-result.err { background: #fdecea; color: #c0392b; border-left: 3px solid #e74c3c; }
+.muted { color: #6b7280; font-size: 11px; margin-top: 4px; }
+.save { padding: 8px 16px !important; background: #5b8def !important; color: #fff !important; border-color: #5b8def !important; opacity: 0.4; cursor: not-allowed; margin-top: 12px !important; }
+.save.dirty { opacity: 1; cursor: pointer; }
+.add { width: 100%; padding: 12px; background: #fff; border: 2px dashed #c0c5cc !important; color: #5b8def !important; font-weight: 600; border-radius: 6px; cursor: pointer; font: inherit; }
+a { color: #5b8def; text-decoration: none; font-size: 11px; }

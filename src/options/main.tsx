@@ -1,2 +1,5 @@
 import { createRoot } from 'react-dom/client';
-createRoot(document.getElementById('root')!).render(<div>Options placeholder</div>);
+import { OptionsApp } from './OptionsApp';
+import './styles.css';
+
+createRoot(document.getElementById('root')!).render(<OptionsApp />);
