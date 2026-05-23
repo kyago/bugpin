@@ -7,11 +7,14 @@ import { bindTab, getBoundTab, rebindToActive, watchTabClosed } from './routing'
 
 console.debug('[qa-ext] background worker booted');
 
-chrome.action.onClicked.addListener(async (tab) => {
-  if (!tab.id || !tab.url) return;
-  bindTab(tab.id, tab.url);
-  await chrome.sidePanel.setOptions({ tabId: tab.id, path: 'src/panel/index.html', enabled: true });
-  await chrome.sidePanel.open({ tabId: tab.id });
+// sidePanel.open() must be called synchronously inside the user-gesture handler;
+// awaiting anything before it loses the gesture context and the call fails silently.
+chrome.action.onClicked.addListener((tab) => {
+  if (!tab.id) return;
+  if (tab.url) bindTab(tab.id, tab.url);
+  chrome.sidePanel.open({ tabId: tab.id }).catch((err) => {
+    console.error('[qa-ext] sidePanel.open failed:', err);
+  });
 });
 
 chrome.runtime.onMessage.addListener((msg: PanelToBg, _sender, sendResponse) => {
