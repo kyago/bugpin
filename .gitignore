@@ -13,3 +13,8 @@ vite.config.js
 vite.config.d.ts
 src/**/*.js
 src/**/*.d.ts
+tests/**/*.js
+tests/**/*.d.ts
+!tests/sinon-chrome.d.ts
+vitest.config.js
+vitest.config.d.ts
