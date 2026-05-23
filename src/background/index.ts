@@ -22,7 +22,8 @@ chrome.runtime.onMessage.addListener((msg: PanelToBg, _sender, sendResponse) => 
     try {
       switch (msg.kind) {
         case 'panel.bootstrap': {
-          const bound = getBoundTab();
+          let bound = getBoundTab();
+          if (!bound) bound = await rebindToActive();
           if (!bound) { sendResponse({ ok: false, code: 'no_tab' }); return; }
           const result: BootstrapResponse = await handleBootstrap(bound.tabId, bound.url);
           sendResponse({ ok: true, payload: result });
@@ -54,12 +55,25 @@ chrome.runtime.onMessage.addListener((msg: PanelToBg, _sender, sendResponse) => 
           return;
         }
         case 'forward.toContent': {
-          const bound = getBoundTab();
-          if (!bound) { sendResponse({ ok: false, code: 'no_tab' }); return; }
+          // Try bound tab first; if missing or unreachable, fall back to active tab
+          // (service worker may have restarted, losing module-level bound state).
+          let bound = getBoundTab();
+          if (!bound) {
+            console.debug('[qa-ext bg] no bound tab, re-binding to active');
+            bound = await rebindToActive();
+          }
+          if (!bound) {
+            console.warn('[qa-ext bg] forward.toContent FAILED: no active tab');
+            sendResponse({ ok: false, code: 'no_tab' });
+            return;
+          }
+          console.debug('[qa-ext bg] forward.toContent', { bound, payload: msg.payload });
           try {
             const resp = await chrome.tabs.sendMessage(bound.tabId, msg.payload);
+            console.debug('[qa-ext bg] forward.toContent OK, resp:', resp);
             sendResponse({ ok: true, payload: resp });
-          } catch {
+          } catch (err) {
+            console.warn('[qa-ext bg] forward.toContent THREW (content script not loaded — page needs refresh):', err);
             sendResponse({ ok: false, code: 'tab_gone' });
           }
           return;

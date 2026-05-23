@@ -4,6 +4,8 @@ import { captureUserAgent } from '@/lib/ua-parse';
 import { scrubPii } from '@/lib/sanitize-pii';
 import type { PanelToContent, ContentToPanel, CapturedSnapshot } from '@/shared/types';
 
+console.debug('[qa-ext content-iso] router initialized on', window.location.href);
+
 const buf = new Buffers();
 let selection: SelectionMode | null = null;
 
@@ -16,8 +18,10 @@ window.addEventListener('message', (e) => {
 
 // === panel messages (relayed via background) ===
 chrome.runtime.onMessage.addListener((msg: PanelToContent, _sender, sendResponse) => {
+  console.debug('[qa-ext content-iso] received:', msg);
   switch (msg.kind) {
     case 'selection.start': {
+      console.debug('[qa-ext content-iso] starting selection mode');
       ensureSelection();
       selection!.start();
       sendResponse({ ok: true });

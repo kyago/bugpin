@@ -7,20 +7,24 @@ import type { IssueDraft, IssueSubmitResult, CollectedData } from '@/shared/type
 
 export function IssueForm() {
   const s = usePanelStore();
-  if (s.screen !== 'MATCHED.EDIT' && s.screen !== 'SUBMIT') return null;
+  const isActive = s.screen === 'MATCHED.EDIT' || s.screen === 'SUBMIT';
 
-  // Refresh collected snapshot whenever we enter EDIT
+  // All hooks MUST be called unconditionally (React rules). Conditional return
+  // belongs AFTER all hooks. Inactive states simply make hook bodies no-op.
+
+  // Refresh collected snapshot whenever we enter EDIT with a picked element
   useEffect(() => {
-    if (!s.picked) return;
+    if (!isActive || !s.picked) return;
     sendToContent({ kind: 'capture.snapshot' }).then((res: unknown) => {
       const r = res as { ok?: boolean; payload?: { kind: string; payload: unknown } };
       if (r?.ok && r.payload?.kind === 'capture.snapshot.result') {
         usePanelStore.setState({ collected: r.payload.payload as CollectedData });
       }
-    });
-  }, [s.picked?.selector]);
+    }).catch(() => { /* content script may be unreachable; ignore */ });
+  }, [isActive, s.picked?.selector]);
 
   const finalBody = useMemo(() => {
+    if (!isActive) return '';
     if (s.bodyOverridden) return s.finalBody;
     if (!s.picked || !s.collected) return '';
     const collected: CollectedData = {
@@ -31,11 +35,14 @@ export function IssueForm() {
       outerHTML: s.picked.outerHTML,
     };
     return applyBodyBudget(formatIssueBody(s.userDescription, collected));
-  }, [s.userDescription, s.collected, s.picked, s.currentDepth, s.bodyOverridden, s.finalBody]);
+  }, [isActive, s.userDescription, s.collected, s.picked, s.currentDepth, s.bodyOverridden, s.finalBody]);
 
   useEffect(() => {
+    if (!isActive) return;
     if (!s.bodyOverridden) usePanelStore.setState({ finalBody });
-  }, [finalBody, s.bodyOverridden]);
+  }, [isActive, finalBody, s.bodyOverridden]);
+
+  if (!isActive) return null;
 
   const onSubmit = async () => {
     if (!s.activeMappingId || !s.picked || !s.collected) return;
