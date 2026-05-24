@@ -33,6 +33,9 @@ export async function ghCreateIssue(
   const code = mapHttpToErrorCode(res.status, res.headers);
   const retryAfter = code === 'rate_limit' ? parseRetryAfter(res.headers, Date.now()) : undefined;
   const text = await res.text().catch(() => '');
+  console.warn('[qa-ext] ghCreateIssue failed', {
+    repo, status: res.status, code, body: text.slice(0, 500),
+  });
   return { ok: false, code, message: text.slice(0, 200), retryAfter };
 }
 
