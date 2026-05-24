@@ -4,6 +4,47 @@ import { useOptionsStore } from '../store';
 
 interface Props { mapping: Mapping; }
 
+/**
+ * Normalize a repo field input into the canonical `owner/repo` form.
+ * Accepts:
+ *   - `owner/repo`                                  → `owner/repo`
+ *   - `https://github.com/owner/repo`               → `owner/repo`
+ *   - `https://github.com/owner/repo.git`           → `owner/repo`
+ *   - `git@github.com:owner/repo.git`               → `owner/repo`
+ *   - `github.com/owner/repo`                       → `owner/repo`
+ * Leaves anything it can't parse as-is so the user sees their typo.
+ */
+function normalizeRepoInput(raw: string): string {
+  const v = raw.trim();
+  if (!v) return v;
+
+  // SSH form: git@github.com:owner/repo(.git)
+  const sshMatch = v.match(/^git@github\.com:([^/]+\/[^/]+?)(?:\.git)?$/i);
+  if (sshMatch) return sshMatch[1]!;
+
+  // Try parsing as URL (with or without scheme)
+  let urlLike = v;
+  if (!/^https?:\/\//i.test(urlLike) && urlLike.includes('github.com/')) {
+    urlLike = 'https://' + urlLike;
+  }
+  if (/^https?:\/\//i.test(urlLike)) {
+    try {
+      const u = new URL(urlLike);
+      if (u.hostname === 'github.com' || u.hostname === 'www.github.com') {
+        const parts = u.pathname.replace(/^\/+|\/+$/g, '').split('/');
+        if (parts.length >= 2 && parts[0] && parts[1]) {
+          const owner = parts[0];
+          const repo = parts[1]!.replace(/\.git$/i, '');
+          return `${owner}/${repo}`;
+        }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // Already canonical or close to it: strip leading slash + trailing .git
+  return v.replace(/^\/+/, '').replace(/\.git$/i, '');
+}
+
 export function MappingRow({ mapping }: Props) {
   const [draft, setDraft] = useState<Mapping>(mapping);
   const [showToken, setShowToken] = useState(false);
@@ -49,7 +90,12 @@ export function MappingRow({ mapping }: Props) {
   return (
     <div className="mapping-row">
       <div className="row-header">
-        <input className="name" value={draft.name} onChange={(e) => update('name', e.target.value)} placeholder="이름" />
+        <input
+          className="name"
+          value={draft.name}
+          onChange={(e) => update('name', e.target.value)}
+          placeholder="예: MyApp 프로덕션"
+        />
         <div>
           <button onClick={onTest}>🔍 토큰 테스트</button>
           <button className="danger" onClick={onDelete}>삭제</button>
@@ -57,17 +103,32 @@ export function MappingRow({ mapping }: Props) {
       </div>
 
       <label>URL 패턴 (쉼표 구분)</label>
-      <input value={draft.urlPatterns.join(', ')}
-             onChange={(e) => update('urlPatterns', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} />
+      <input
+        value={draft.urlPatterns.join(', ')}
+        onChange={(e) => update('urlPatterns', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+        placeholder="예: myapp.com, *.vercel.app, localhost:3000"
+      />
       <button className="link" onClick={useCurrentDomain}>현재 도메인 사용</button>
 
       <label>레포 (owner/name)</label>
-      <input value={draft.repo} onChange={(e) => update('repo', e.target.value)} />
+      <input
+        value={draft.repo}
+        onChange={(e) => update('repo', e.target.value)}
+        onBlur={(e) => {
+          const normalized = normalizeRepoInput(e.target.value);
+          if (normalized !== draft.repo) update('repo', normalized);
+        }}
+        placeholder="예: KLV-korea/k-learnstay (GitHub URL도 자동 변환됨)"
+      />
 
       <label>토큰</label>
       <div className="token-row">
-        <input type={showToken ? 'text' : 'password'} value={draft.token}
-               onChange={(e) => update('token', e.target.value)} />
+        <input
+          type={showToken ? 'text' : 'password'}
+          value={draft.token}
+          onChange={(e) => update('token', e.target.value)}
+          placeholder="예: github_pat_xxxxxxxxxxxxxxx"
+        />
         <button onClick={() => setShowToken(!showToken)}>{showToken ? '숨기기' : '표시'}</button>
       </div>
       <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noreferrer">
