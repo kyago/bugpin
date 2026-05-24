@@ -1,6 +1,8 @@
-# QA 이슈 리포터 (Chrome Extension)
+# Bugpin
 
-비개발자 QA 가 웹 페이지에서 element 단위로 GitHub Issue 를 등록하는 도구.
+비개발자 QA 가 웹 페이지에서 element 를 콕 찍어 GitHub Issue 로 등록하는 Chrome 확장 도구.
+
+📍🐛 element 선택 → 컨텍스트 자동 수집 → GitHub Issue 등록
 
 ## 설치
 

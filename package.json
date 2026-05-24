@@ -1,5 +1,5 @@
 {
-  "name": "qa-issue-reporter",
+  "name": "bugpin",
   "private": true,
   "version": "0.1.0",
   "type": "module",

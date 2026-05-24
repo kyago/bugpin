@@ -37,7 +37,7 @@ export function OptionsApp() {
 
   return (
     <div className="options-root">
-      <h1>⚙️ QA 이슈 리포터 설정</h1>
+      <h1>⚙️ Bugpin 설정</h1>
       <div className="threat-notice">
         ⚠️ <strong>위협 모델</strong>: 이 확장은 <code>fetch / XMLHttpRequest / console.error</code> 를 페이지 컨텍스트에서 monkey-patch 합니다.
         동일 origin 의 페이지 스크립트가 캡처된 데이터를 관찰할 수 있어요. <strong>내부 신뢰 앱 전용</strong>입니다.
