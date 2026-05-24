@@ -14,6 +14,20 @@ type Callbacks = {
   onCancelled: () => void;
 };
 
+/**
+ * State machine:
+ *   IDLE     — no overlay, no listeners
+ *   PICKING  — overlay + crosshair + all listeners (active=true)
+ *   PICKED   — overlay highlight stays, ESC listener stays, no pick listeners
+ *              (active=false, parentChain.length > 0)
+ *
+ * Transitions:
+ *   IDLE    → PICKING : start()
+ *   PICKING → PICKED  : handleClick fires (element picked)
+ *   PICKING → IDLE    : stop() / ESC
+ *   PICKED  → PICKING : start() called again (re-pick scenario)
+ *   PICKED  → IDLE    : stop() / ESC
+ */
 export class SelectionMode {
   private overlay = new Overlay();
   private active = false;
@@ -25,6 +39,11 @@ export class SelectionMode {
 
   start(): void {
     if (this.active) return;
+    // If we're currently in PICKED state (parentChain populated), reset first
+    // so the next pick starts clean (no stale highlight, fresh listeners).
+    if (this.parentChain.length > 0) {
+      this.teardown();
+    }
     this.active = true;
     this.overlay.mount();
     document.body.style.cursor = 'crosshair';
@@ -40,8 +59,13 @@ export class SelectionMode {
   }
 
   stop(): void {
-    if (!this.active) return;
-    this.active = false;
+    // Allow stop from either PICKING (active=true) or PICKED (parentChain set)
+    if (!this.active && this.parentChain.length === 0) return;
+    this.teardown();
+  }
+
+  /** Tear down all listeners + overlay regardless of state. */
+  private teardown(): void {
     this.overlay.unmount();
     document.body.style.cursor = '';
     BLOCK_EVENTS.forEach(t =>
@@ -50,6 +74,7 @@ export class SelectionMode {
     document.removeEventListener('keydown', this.handleKey, true);
     document.removeEventListener('mousemove', this.handleMove, true);
     document.removeEventListener('click', this.handleClick, true);
+    this.active = false;
     this.currentTarget = null;
     this.parentChain = [];
     this.currentDepth = 0;
@@ -70,15 +95,18 @@ export class SelectionMode {
   };
 
   private handleKey = (e: KeyboardEvent): void => {
-    if (!this.active) return;
+    // ESC cancels from both PICKING and PICKED states
     if (e.key === 'Escape') {
       this.stop();
       this.cb.onCancelled();
       return;
     }
-    // Block other keys
-    e.preventDefault();
-    e.stopImmediatePropagation();
+    // Block other keys only while actively picking — don't interfere with
+    // form input or page shortcuts after a pick.
+    if (this.active) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
   };
 
   private handleMove = (e: MouseEvent): void => {
@@ -99,13 +127,15 @@ export class SelectionMode {
     this.currentDepth = 0;
     const payload = this.toPayload(el);
     this.overlay.highlight(el);
-    // Keep overlay alive but stop intercepting page events
+    // Transition PICKING → PICKED:
+    // remove pick-mode listeners, keep overlay+highlight + keydown for ESC.
     BLOCK_EVENTS.forEach(t =>
       document.removeEventListener(t, this.blockAll, true)
     );
     document.removeEventListener('mousemove', this.handleMove, true);
     document.removeEventListener('click', this.handleClick, true);
     document.body.style.cursor = '';
+    this.active = false;
     this.cb.onPicked(payload);
   };
 
