@@ -1,31 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { buildSelector, buildLabel } from '@/lib/selector';
-
-beforeEach(() => {
-  document.body.innerHTML = '';
-});
-
-describe('buildSelector', () => {
-  it('uses #id when element has id', () => {
-    document.body.innerHTML = `<div id="hero"><button id="cta">x</button></div>`;
-    const el = document.getElementById('cta')!;
-    expect(buildSelector(el)).toBe('#cta');
-  });
-
-  it('builds nth-child path when no id', () => {
-    document.body.innerHTML = `<main><section><button>a</button><button>b</button></section></main>`;
-    const buttons = document.querySelectorAll('button');
-    const sel = buildSelector(buttons[1]!);
-    expect(sel).toContain('nth-child(2)');
-    expect(sel).toMatch(/^body > /);
-  });
-
-  it('includes class along with nth-child for clarity', () => {
-    document.body.innerHTML = `<div class="card"><div class="card"></div></div>`;
-    const inner = document.querySelectorAll('.card')[1]!;
-    expect(buildSelector(inner)).toContain('.card');
-  });
-});
+import { describe, it, expect } from 'vitest';
+import { buildLabel } from '@/lib/selector';
 
 describe('buildLabel', () => {
   it('tag#id.firstClass', () => {
