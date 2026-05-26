@@ -33,6 +33,8 @@ export function IssueForm() {
       selector: s.picked.selector,
       parentChainSummary: s.picked.parentChainSummary,
       outerHTML: s.picked.outerHTML,
+      anchorChain: s.picked.anchorChain,
+      sourceFile: s.picked.sourceFile,
     };
     return applyBodyBudget(formatIssueBody(s.userDescription, collected));
   }, [isActive, s.userDescription, s.collected, s.picked, s.currentDepth, s.bodyOverridden, s.finalBody]);
@@ -58,6 +60,8 @@ export function IssueForm() {
         selector: s.picked.selector,
         parentChainSummary: s.picked.parentChainSummary,
         outerHTML: s.picked.outerHTML,
+        anchorChain: s.picked.anchorChain,
+        sourceFile: s.picked.sourceFile,
       } as CollectedData,
       finalBody: s.finalBody,
       bodyOverridden: s.bodyOverridden,
