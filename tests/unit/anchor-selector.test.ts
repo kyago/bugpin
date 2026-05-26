@@ -178,3 +178,20 @@ describe('buildPickInfo — tier 6 (semantic tags)', () => {
     expect(info.anchorChain).toEqual([]);
   });
 });
+
+describe('buildPickInfo — anchor === target', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('returns anchor selector alone when clicked element IS the anchor', () => {
+    document.body.innerHTML = `<div data-block="hero">x</div>`;
+    const info = buildPickInfo(document.querySelector('[data-block]')!);
+    expect(info.selector).toBe('[data-block="hero"]');
+    expect(info.anchorChain).toEqual(['hero']);
+  });
+
+  it('same for role-based anchor', () => {
+    document.body.innerHTML = `<button role="button" aria-label="OK">x</button>`;
+    const info = buildPickInfo(document.querySelector('button')!);
+    expect(info.selector).toBe('[role="button"][aria-label="OK"]');
+  });
+});
