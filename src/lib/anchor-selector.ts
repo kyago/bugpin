@@ -23,6 +23,8 @@ interface AnchorMatch {
   sourceFile: string | null;
 }
 
+const SEMANTIC_TAGS = new Set(['section', 'article', 'main', 'nav', 'header', 'footer']);
+
 function buildRelativePath(anchor: Element, target: Element): string {
   if (anchor === target) return '';
   const parts: string[] = [];
@@ -83,6 +85,15 @@ function matchAnchor(el: Element): AnchorMatch | null {
       ? `[role="${cssEscape(role)}"][aria-label="${cssEscape(aria)}"]`
       : `[role="${cssEscape(role)}"]`;
     return { node: roleNode, selector: sel, label: aria || role, sourceFile: null };
+  }
+  // tier 6: semantic tag
+  let semCur: Element | null = el;
+  while (semCur) {
+    if (SEMANTIC_TAGS.has(semCur.tagName.toLowerCase())) {
+      const tag = semCur.tagName.toLowerCase();
+      return { node: semCur, selector: tag, label: tag, sourceFile: null };
+    }
+    semCur = semCur.parentElement;
   }
   return null;
 }

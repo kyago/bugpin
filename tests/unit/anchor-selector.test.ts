@@ -154,3 +154,27 @@ describe('buildPickInfo — tier 5 (role + optional aria-label)', () => {
     expect(() => document.querySelectorAll(info.selector)).not.toThrow();
   });
 });
+
+describe('buildPickInfo — tier 6 (semantic tags)', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('uses <section> as anchor when no higher tier matches', () => {
+    document.body.innerHTML = `<section><div><span>x</span></div></section>`;
+    const info = buildPickInfo(document.querySelector('span')!);
+    expect(info.selector.startsWith('section')).toBe(true);
+    expect(info.anchorChain).toEqual(['section']);
+  });
+
+  it('uses innermost semantic ancestor', () => {
+    document.body.innerHTML = `<main><article><span>x</span></article></main>`;
+    const info = buildPickInfo(document.querySelector('span')!);
+    expect(info.selector.startsWith('article')).toBe(true);
+  });
+
+  it('does NOT match non-semantic tags (div)', () => {
+    document.body.innerHTML = `<div><span>x</span></div>`;
+    const info = buildPickInfo(document.querySelector('span')!);
+    expect(info.selector).toMatch(/^body > /);
+    expect(info.anchorChain).toEqual([]);
+  });
+});
