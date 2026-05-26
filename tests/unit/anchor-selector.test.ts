@@ -67,7 +67,8 @@ describe('buildPickInfo — data-* tiers', () => {
     const info = buildPickInfo(btn);
     expect(info.selector).toContain('[data-block="card"]');
     expect(info.selector).toContain('button');
-    expect(info.anchorChain).toEqual(['card']);
+    // chain 은 outer→inner 순서로 수집되므로 outer <section> tier 6 도 포함됨
+    expect(info.anchorChain).toEqual(['section', 'card']);
   });
 
   it('tier 2: [data-sentry-component] picks anchor and extracts sourceFile', () => {
@@ -193,5 +194,36 @@ describe('buildPickInfo — anchor === target', () => {
     document.body.innerHTML = `<button role="button" aria-label="OK">x</button>`;
     const info = buildPickInfo(document.querySelector('button')!);
     expect(info.selector).toBe('[role="button"][aria-label="OK"]');
+  });
+});
+
+describe('buildPickInfo — anchorChain collection', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('collects outer-to-inner order across multiple tiers', () => {
+    document.body.innerHTML = `
+      <div data-sentry-component="Pricing">
+        <div data-block="product-card">
+          <button>buy</button>
+        </div>
+      </div>`;
+    const info = buildPickInfo(document.querySelector('button')!);
+    expect(info.anchorChain).toEqual(['Pricing', 'product-card']);
+  });
+
+  it('caps the chain at 3 entries', () => {
+    document.body.innerHTML = `
+      <section>
+        <div data-section="a">
+          <div data-sentry-component="B">
+            <div data-block="c">
+              <span>x</span>
+            </div>
+          </div>
+        </div>
+      </section>`;
+    const info = buildPickInfo(document.querySelector('span')!);
+    expect(info.anchorChain.length).toBeLessThanOrEqual(3);
+    expect(info.anchorChain[info.anchorChain.length - 1]).toBe('c');
   });
 });

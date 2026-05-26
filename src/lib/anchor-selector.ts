@@ -98,6 +98,18 @@ function matchAnchor(el: Element): AnchorMatch | null {
   return null;
 }
 
+function collectAnchorChain(deepest: AnchorMatch): string[] {
+  const labels: string[] = [deepest.label];
+  let cur: Element | null = deepest.node.parentElement;
+  while (cur && labels.length < 3) {
+    const m = matchAnchor(cur);
+    if (!m) break;
+    labels.push(m.label);
+    cur = m.node.parentElement;
+  }
+  return labels.reverse();
+}
+
 export function buildPickInfo(el: Element): PickInfo {
   const anchor = matchAnchor(el);
   if (!anchor) {
@@ -105,7 +117,7 @@ export function buildPickInfo(el: Element): PickInfo {
   }
   const relative = buildRelativePath(anchor.node, el);
   const selector = relative ? `${anchor.selector} ${relative}` : anchor.selector;
-  return { selector, anchorChain: [anchor.label], sourceFile: anchor.sourceFile };
+  return { selector, anchorChain: collectAnchorChain(anchor), sourceFile: anchor.sourceFile };
 }
 
 export function buildNthChildSelector(el: Element): string {
