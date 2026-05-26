@@ -53,6 +53,41 @@ describe('formatIssueBody', () => {
   });
 });
 
+describe('formatIssueBody — anchor lines', () => {
+  it('includes Anchor 체인 line when anchorChain non-empty', () => {
+    const c: CollectedData = { ...baseCollected, anchorChain: ['Pricing', 'product-card'] };
+    const body = formatIssueBody('x', c);
+    expect(body).toContain('Anchor 체인');
+    expect(body).toContain('Pricing → product-card');
+  });
+
+  it('includes 소스 파일 line when sourceFile present', () => {
+    const c: CollectedData = {
+      ...baseCollected,
+      anchorChain: ['Pricing'],
+      sourceFile: 'Pricing.tsx',
+    };
+    const body = formatIssueBody('x', c);
+    expect(body).toContain('소스 파일');
+    expect(body).toContain('Pricing.tsx');
+  });
+
+  it('omits both lines when anchorChain empty and sourceFile null', () => {
+    const body = formatIssueBody('x', baseCollected);
+    expect(body).not.toContain('Anchor 체인');
+    expect(body).not.toContain('소스 파일');
+  });
+
+  it('emits Anchor 체인 above Selector line', () => {
+    const c: CollectedData = { ...baseCollected, anchorChain: ['A'] };
+    const body = formatIssueBody('x', c);
+    const anchorIdx = body.indexOf('Anchor 체인');
+    const selectorIdx = body.indexOf('**Selector**');
+    expect(anchorIdx).toBeGreaterThan(0);
+    expect(anchorIdx).toBeLessThan(selectorIdx);
+  });
+});
+
 describe('applyBodyBudget', () => {
   it('returns as-is when under budget', () => {
     const out = applyBodyBudget('short body');
