@@ -23,7 +23,48 @@ interface AnchorMatch {
   sourceFile: string | null;
 }
 
-function matchAnchor(_el: Element): AnchorMatch | null {
+function buildRelativePath(anchor: Element, target: Element): string {
+  if (anchor === target) return '';
+  const parts: string[] = [];
+  let cur: Element | null = target;
+  while (cur && cur !== anchor) {
+    const p: Element | null = cur.parentElement;
+    if (!p) break;
+    const idx = Array.from(p.children).indexOf(cur) + 1;
+    let part = cur.tagName.toLowerCase();
+    const firstClass = cur.classList[0];
+    if (firstClass) part += `.${cssEscape(firstClass)}`;
+    part += `:nth-child(${idx})`;
+    parts.unshift(part);
+    cur = p;
+  }
+  return parts.join(' > ');
+}
+
+function matchAnchor(el: Element): AnchorMatch | null {
+  // tier 1: data-block
+  const block = el.closest<HTMLElement>('[data-block]');
+  if (block) {
+    const v = block.getAttribute('data-block') ?? '';
+    return { node: block, selector: `[data-block="${cssEscape(v)}"]`, label: v, sourceFile: null };
+  }
+  // tier 2: data-sentry-component (+ source-file)
+  const sentry = el.closest<HTMLElement>('[data-sentry-component]');
+  if (sentry) {
+    const v = sentry.getAttribute('data-sentry-component') ?? '';
+    return {
+      node: sentry,
+      selector: `[data-sentry-component="${cssEscape(v)}"]`,
+      label: v,
+      sourceFile: sentry.getAttribute('data-sentry-source-file'),
+    };
+  }
+  // tier 3: data-section
+  const section = el.closest<HTMLElement>('[data-section]');
+  if (section) {
+    const v = section.getAttribute('data-section') ?? '';
+    return { node: section, selector: `[data-section="${cssEscape(v)}"]`, label: v, sourceFile: null };
+  }
   return null;
 }
 
@@ -32,7 +73,9 @@ export function buildPickInfo(el: Element): PickInfo {
   if (!anchor) {
     return { selector: buildNthChildSelector(el), anchorChain: [], sourceFile: null };
   }
-  return { selector: anchor.selector, anchorChain: [anchor.label], sourceFile: anchor.sourceFile };
+  const relative = buildRelativePath(anchor.node, el);
+  const selector = relative ? `${anchor.selector} ${relative}` : anchor.selector;
+  return { selector, anchorChain: [anchor.label], sourceFile: anchor.sourceFile };
 }
 
 export function buildNthChildSelector(el: Element): string {
