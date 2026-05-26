@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { isAutoId, buildNthChildSelector } from '@/lib/anchor-selector';
+import { isAutoId, buildNthChildSelector, buildPickInfo } from '@/lib/anchor-selector';
 
 describe('isAutoId', () => {
   it('rejects React useId pattern :r0:', () => {
@@ -36,5 +36,19 @@ describe('buildNthChildSelector (fallback)', () => {
 
   it('returns "body" for the body element itself', () => {
     expect(buildNthChildSelector(document.body)).toBe('body');
+  });
+});
+
+describe('buildPickInfo (no anchor)', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('falls back to nth-child path when no anchor exists', () => {
+    document.body.innerHTML = `<div><div><span>x</span></div></div>`;
+    const span = document.querySelector('span')!;
+    const info = buildPickInfo(span);
+    expect(info.selector).toMatch(/^body > /);
+    expect(info.selector).toContain('span');
+    expect(info.anchorChain).toEqual([]);
+    expect(info.sourceFile).toBeNull();
   });
 });

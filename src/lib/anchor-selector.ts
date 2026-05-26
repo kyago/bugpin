@@ -10,6 +10,31 @@ function cssEscape(s: string): string {
     : s.replace(/[^\w-]/g, '\\$&');
 }
 
+export interface PickInfo {
+  selector: string;
+  anchorChain: string[];
+  sourceFile: string | null;
+}
+
+interface AnchorMatch {
+  node: Element;
+  selector: string;
+  label: string;
+  sourceFile: string | null;
+}
+
+function matchAnchor(_el: Element): AnchorMatch | null {
+  return null;
+}
+
+export function buildPickInfo(el: Element): PickInfo {
+  const anchor = matchAnchor(el);
+  if (!anchor) {
+    return { selector: buildNthChildSelector(el), anchorChain: [], sourceFile: null };
+  }
+  return { selector: anchor.selector, anchorChain: [anchor.label], sourceFile: anchor.sourceFile };
+}
+
 export function buildNthChildSelector(el: Element): string {
   const path: string[] = [];
   let cur: Element | null = el;
