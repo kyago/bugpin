@@ -130,3 +130,27 @@ describe('buildPickInfo — tier 4 (stable id)', () => {
     expect(info.anchorChain).toEqual(['#cta']);
   });
 });
+
+describe('buildPickInfo — tier 5 (role + optional aria-label)', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('uses [role] alone when no aria-label', () => {
+    document.body.innerHTML = `<div role="dialog"><span>x</span></div>`;
+    const info = buildPickInfo(document.querySelector('span')!);
+    expect(info.selector).toContain('[role="dialog"]');
+    expect(info.anchorChain).toEqual(['dialog']);
+  });
+
+  it('combines [role][aria-label] when label present', () => {
+    document.body.innerHTML = `<div role="button" aria-label="장바구니"><i>i</i></div>`;
+    const info = buildPickInfo(document.querySelector('i')!);
+    expect(info.selector).toContain('[role="button"][aria-label="장바구니"]');
+    expect(info.anchorChain).toEqual(['장바구니']);
+  });
+
+  it('escapes special chars in aria-label', () => {
+    document.body.innerHTML = `<div role="button" aria-label='Say "hi"'><i>i</i></div>`;
+    const info = buildPickInfo(document.querySelector('i')!);
+    expect(() => document.querySelectorAll(info.selector)).not.toThrow();
+  });
+});

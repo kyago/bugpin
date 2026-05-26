@@ -74,6 +74,16 @@ function matchAnchor(el: Element): AnchorMatch | null {
     }
     idCur = idCur.parentElement;
   }
+  // tier 5: [role] + optional [aria-label]
+  const roleNode = el.closest<HTMLElement>('[role]');
+  if (roleNode) {
+    const role = roleNode.getAttribute('role') ?? '';
+    const aria = roleNode.getAttribute('aria-label');
+    const sel = aria
+      ? `[role="${cssEscape(role)}"][aria-label="${cssEscape(aria)}"]`
+      : `[role="${cssEscape(role)}"]`;
+    return { node: roleNode, selector: sel, label: aria || role, sourceFile: null };
+  }
   return null;
 }
 
