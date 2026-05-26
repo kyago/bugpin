@@ -65,6 +65,15 @@ function matchAnchor(el: Element): AnchorMatch | null {
     const v = section.getAttribute('data-section') ?? '';
     return { node: section, selector: `[data-section="${cssEscape(v)}"]`, label: v, sourceFile: null };
   }
+  // tier 4: stable id (auto-id 제외)
+  let idCur: Element | null = el;
+  while (idCur) {
+    const id = idCur.id;
+    if (id && !isAutoId(id)) {
+      return { node: idCur, selector: `#${cssEscape(id)}`, label: `#${id}`, sourceFile: null };
+    }
+    idCur = idCur.parentElement;
+  }
   return null;
 }
 

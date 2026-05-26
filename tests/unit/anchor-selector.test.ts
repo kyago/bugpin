@@ -106,3 +106,27 @@ describe('buildPickInfo — data-* tiers', () => {
     expect(info.selector).toContain('[data-block="inner"]');
   });
 });
+
+describe('buildPickInfo — tier 4 (stable id)', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('uses stable id as anchor', () => {
+    document.body.innerHTML = `<div id="checkout"><button>buy</button></div>`;
+    const info = buildPickInfo(document.querySelector('button')!);
+    expect(info.selector).toContain('#checkout');
+    expect(info.anchorChain).toEqual(['#checkout']);
+  });
+
+  it('skips auto id (:r0:) and falls through to lower tiers', () => {
+    document.body.innerHTML = `<section><div id=":r0:"><button>x</button></div></section>`;
+    const info = buildPickInfo(document.querySelector('button')!);
+    expect(info.selector).not.toContain('#:r0:');
+  });
+
+  it('clicked element with its own stable id → anchor is the element itself', () => {
+    document.body.innerHTML = `<button id="cta">x</button>`;
+    const info = buildPickInfo(document.getElementById('cta')!);
+    expect(info.selector).toBe('#cta');
+    expect(info.anchorChain).toEqual(['#cta']);
+  });
+});
