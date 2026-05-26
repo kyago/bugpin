@@ -98,6 +98,20 @@ function matchAnchor(el: Element): AnchorMatch | null {
   return null;
 }
 
+function ensureUnique(anchor: AnchorMatch): AnchorMatch | null {
+  if (document.querySelectorAll(anchor.selector).length <= 1) return anchor;
+  const parent = anchor.node.parentElement;
+  if (!parent) return null;
+  const sameTag = Array.from(parent.children).filter(c => c.tagName === anchor.node.tagName);
+  const idx = sameTag.indexOf(anchor.node) + 1;
+  if (idx < 1) return null;
+  const newSel = `${anchor.selector}:nth-of-type(${idx})`;
+  if (document.querySelectorAll(newSel).length === 1) {
+    return { ...anchor, selector: newSel };
+  }
+  return null;
+}
+
 function collectAnchorChain(deepest: AnchorMatch): string[] {
   const labels: string[] = [deepest.label];
   let cur: Element | null = deepest.node.parentElement;
@@ -111,7 +125,11 @@ function collectAnchorChain(deepest: AnchorMatch): string[] {
 }
 
 export function buildPickInfo(el: Element): PickInfo {
-  const anchor = matchAnchor(el);
+  const raw = matchAnchor(el);
+  if (!raw) {
+    return { selector: buildNthChildSelector(el), anchorChain: [], sourceFile: null };
+  }
+  const anchor = ensureUnique(raw);
   if (!anchor) {
     return { selector: buildNthChildSelector(el), anchorChain: [], sourceFile: null };
   }

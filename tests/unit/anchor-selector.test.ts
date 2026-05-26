@@ -227,3 +227,30 @@ describe('buildPickInfo — anchorChain collection', () => {
     expect(info.anchorChain[info.anchorChain.length - 1]).toBe('c');
   });
 });
+
+describe('buildPickInfo — uniqueness', () => {
+  beforeEach(() => { document.body.innerHTML = ''; });
+
+  it('adds :nth-of-type when sibling anchors share the same tier match', () => {
+    document.body.innerHTML = `
+      <main>
+        <section><div>a</div></section>
+        <section><span class="target">b</span></section>
+      </main>`;
+    const target = document.querySelectorAll('.target')[0]!;
+    const info = buildPickInfo(target);
+    expect(info.selector).toContain('section:nth-of-type(2)');
+  });
+
+  it('falls back to nth-child when anchor matches are non-sibling and cannot be disambiguated', () => {
+    document.body.innerHTML = `
+      <main>
+        <div><section><span class="t">a</span></section></div>
+        <div><section><span class="t">b</span></section></div>
+      </main>`;
+    const target = document.querySelectorAll('.t')[1]!;
+    const info = buildPickInfo(target);
+    expect(info.selector).toMatch(/^body > /);
+    expect(info.anchorChain).toEqual([]);
+  });
+});
