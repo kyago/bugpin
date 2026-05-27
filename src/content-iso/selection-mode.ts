@@ -1,5 +1,6 @@
 import { Overlay } from './overlay';
-import { buildSelector, buildLabel } from '@/lib/selector';
+import { buildLabel } from '@/lib/selector';
+import { buildPickInfo } from '@/lib/anchor-selector';
 import { sanitizeOuterHTML } from '@/lib/sanitize-html';
 import type { PickedElement } from '@/shared/types';
 
@@ -140,12 +141,15 @@ export class SelectionMode {
   };
 
   private toPayload(el: Element): PickedElement {
+    const info = buildPickInfo(el);
     return {
-      selector: buildSelector(el),
+      selector: info.selector,
       outerHTML: sanitizeOuterHTML(el),
       parentChainSummary: this.parentChain.map(buildLabel),
       maxDepth: Math.max(0, this.parentChain.length - 1),
       currentDepth: this.currentDepth,
+      anchorChain: info.anchorChain,
+      sourceFile: info.sourceFile,
     };
   }
 }

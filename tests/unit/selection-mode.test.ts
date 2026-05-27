@@ -21,6 +21,8 @@ describe('SelectionMode click-to-pick', () => {
 
     expect(picked).not.toBeNull();
     expect(picked!.selector).toBe('#btn');
+    expect(picked!.anchorChain).toEqual(['#root', '#btn']);
+    expect(picked!.sourceFile).toBeNull();
     expect(cancelled).toBe(false);
 
     sm.stop();

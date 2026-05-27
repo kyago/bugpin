@@ -10,6 +10,12 @@ export function formatIssueBody(userDescription: string, c: CollectedData): stri
   parts.push('## 자동 수집 정보');
   parts.push(`- **URL**: ${c.url}`);
   parts.push(`- **선택 범위**: depth +${c.selectedDepth} (${c.parentChainSummary[c.selectedDepth] ?? c.parentChainSummary.at(-1) ?? '?'})`);
+  if (c.anchorChain && c.anchorChain.length > 0) {
+    parts.push(`- **Anchor 체인**: ${c.anchorChain.join(' → ')}`);
+  }
+  if (c.sourceFile) {
+    parts.push(`- **소스 파일**: ${c.sourceFile}`);
+  }
   parts.push(`- **Selector**: \`${c.selector}\``);
   parts.push(`- **브라우저**: ${c.ua.browser} / ${c.ua.platform}`);
   parts.push(`- **뷰포트**: ${c.viewport.w} × ${c.viewport.h}`);

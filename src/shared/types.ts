@@ -48,6 +48,8 @@ export interface PickedElement {
   parentChainSummary: string[];
   maxDepth: number;
   currentDepth: number;
+  anchorChain?: string[];
+  sourceFile?: string | null;
 }
 
 export interface CapturedSnapshot {
@@ -64,6 +66,8 @@ export interface CollectedData extends CapturedSnapshot {
   selector: string;
   parentChainSummary: string[];
   outerHTML: string;
+  anchorChain?: string[];
+  sourceFile?: string | null;
 }
 
 // ============ Draft / Submit ============
