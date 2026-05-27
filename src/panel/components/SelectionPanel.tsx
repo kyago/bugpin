@@ -67,9 +67,17 @@ export function SelectionPanel() {
         </>
       )}
       {picked && (
-        <div className="selector-preview" title={picked.selector}>
-          <code>{picked.selector}</code>
-        </div>
+        <>
+          {picked.anchorChain && picked.anchorChain.length > 0 && (
+            <div className="anchor-chain" title={picked.anchorChain.join(' → ')}>
+              <code>⚓ {picked.anchorChain.join(' → ')}</code>
+              {picked.sourceFile && <span className="source-file"> · {picked.sourceFile}</span>}
+            </div>
+          )}
+          <div className="selector-preview" title={picked.selector}>
+            <code>{picked.selector}</code>
+          </div>
+        </>
       )}
     </div>
   );
