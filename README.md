@@ -40,7 +40,6 @@ GitHub Settings → Developer settings → Personal access tokens → Fine-grain
 - 전역 단축키 미지원 (수동 아이콘 클릭만)
 - 토큰 평문 저장 (위 참조)
 - 적대적 사이트 설치 금지
-- 자동 생성 id (`:r0:`, `__abc` 등) 의 selector 안정성 낮음
 
 ## 개발
 
