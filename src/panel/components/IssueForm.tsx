@@ -67,8 +67,12 @@ export function IssueForm() {
       bodyOverridden: s.bodyOverridden,
     };
     const result = await sendToBg<IssueSubmitResult>({ kind: 'issue.submit', payload: draft });
-    if (result.ok) usePanelStore.getState().onSubmitSuccess(result);
-    else usePanelStore.getState().onSubmitFailure(result);
+    if (result.ok) {
+      await sendToContent({ kind: 'selection.cancel' }).catch(() => {});
+      usePanelStore.getState().onSubmitSuccess(result);
+    } else {
+      usePanelStore.getState().onSubmitFailure(result);
+    }
   };
 
   const size = (s.finalBody ?? '').length;
